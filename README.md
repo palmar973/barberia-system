@@ -26,7 +26,7 @@ Sigue estos pasos para desplegar el proyecto en un entorno local:
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://github.com/TU_USUARIO/barberia-system.git](https://github.com/palmar973/barberia-system.git)
+    git clone [https://github.com/palmar973/barberia-system.git](https://github.com/palmar973/barberia-system.git)
     cd barberia-system
     ```
 
