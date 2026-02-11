@@ -16,6 +16,7 @@ from views.pago_view import PagoView
 from views.cierre_caja_view import CierreCajaView
 from views.cita_express_view import CitaExpressView
 from views.reasignar_cliente_view import ReasignarClienteView
+from views.reporte_comisiones_view import ReporteComisionesView
 
 class MainView(QMainWindow):
     """Dashboard Principal Multi-Barbero con Tasa BCV."""
@@ -67,6 +68,8 @@ class MainView(QMainWindow):
         btn_servicios.clicked.connect(self.abrir_servicios)
         btn_caja = self.crear_boton_menu("💰 Cierre de Caja", "#34495E")
         btn_caja.clicked.connect(self.abrir_cierre_caja)
+        btn_comisiones = self.crear_boton_menu("📊 Comisiones", "#34495E")
+        btn_comisiones.clicked.connect(self.abrir_comisiones)
         
         sidebar_layout.addWidget(btn_express)
         sidebar_layout.addSpacing(10)
@@ -74,6 +77,7 @@ class MainView(QMainWindow):
         sidebar_layout.addWidget(btn_clientes)
         sidebar_layout.addWidget(btn_servicios)
         sidebar_layout.addWidget(btn_caja)
+        sidebar_layout.addWidget(btn_comisiones)
         sidebar_layout.addStretch() 
 
         main_layout.addWidget(sidebar)
@@ -251,4 +255,8 @@ class MainView(QMainWindow):
     
     def abrir_cierre_caja(self):
         view = CierreCajaView(self)
+        view.exec()
+    
+    def abrir_comisiones(self):
+        view = ReporteComisionesView(self)
         view.exec()
