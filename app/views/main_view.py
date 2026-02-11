@@ -17,6 +17,7 @@ from views.cierre_caja_view import CierreCajaView
 from views.cita_express_view import CitaExpressView
 from views.reasignar_cliente_view import ReasignarClienteView
 from views.reporte_comisiones_view import ReporteComisionesView
+from views.dashboard_view import DashboardView
 
 class MainView(QMainWindow):
     """Dashboard Principal Multi-Barbero con Tasa BCV."""
@@ -58,10 +59,14 @@ class MainView(QMainWindow):
         self.lbl_tasa.setStyleSheet("color: #F1C40F; margin-bottom: 20px;")
         sidebar_layout.addWidget(self.lbl_tasa)
         
+        btn_dashboard = self.crear_boton_menu("📈 Dashboard", "#9B59B6")
+        btn_dashboard.clicked.connect(self.mostrar_dashboard)
         btn_express = self.crear_boton_menu("⚡ Atención Inmediata", "#D35400")
         btn_express.clicked.connect(self.abrir_cita_express)
         btn_nueva_cita = self.crear_boton_menu("📅 Agendar Cita", "#27AE60")
         btn_nueva_cita.clicked.connect(self.abrir_nueva_cita)
+        btn_agenda = self.crear_boton_menu("📅 Agenda", "#34495E")
+        btn_agenda.clicked.connect(self.mostrar_agenda)
         btn_clientes = self.crear_boton_menu("👥 Clientes", "#34495E")
         btn_clientes.clicked.connect(self.abrir_clientes)
         btn_servicios = self.crear_boton_menu("✂️ Servicios", "#34495E")
@@ -71,9 +76,12 @@ class MainView(QMainWindow):
         btn_comisiones = self.crear_boton_menu("📊 Comisiones", "#34495E")
         btn_comisiones.clicked.connect(self.abrir_comisiones)
         
+        sidebar_layout.addWidget(btn_dashboard)
+        sidebar_layout.addSpacing(10)
         sidebar_layout.addWidget(btn_express)
         sidebar_layout.addSpacing(10)
         sidebar_layout.addWidget(btn_nueva_cita)
+        sidebar_layout.addWidget(btn_agenda)
         sidebar_layout.addWidget(btn_clientes)
         sidebar_layout.addWidget(btn_servicios)
         sidebar_layout.addWidget(btn_caja)
@@ -82,10 +90,22 @@ class MainView(QMainWindow):
 
         main_layout.addWidget(sidebar)
 
-        content_area = QWidget()
-        content_layout = QVBoxLayout()
-        content_area.setLayout(content_layout)
-        content_layout.setContentsMargins(20, 20, 20, 20)
+        # Content area: inicialmente mostrará la Agenda
+        self.content_area = QWidget()
+        self.content_layout = QVBoxLayout()
+        self.content_area.setLayout(self.content_layout)
+        self.content_layout.setContentsMargins(20, 20, 20, 20)
+        
+        main_layout.addWidget(self.content_area)
+        
+        # Crear vista de agenda
+        self.crear_vista_agenda()
+
+
+    def crear_vista_agenda(self):
+        """Crea la vista de agenda diaria."""
+        # Limpiar el content_layout
+        self.limpiar_content_area()
         
         header_layout = QHBoxLayout()
         lbl_agenda = QLabel("Agenda Diaria")
@@ -103,7 +123,7 @@ class MainView(QMainWindow):
         header_layout.addStretch()
         header_layout.addWidget(QLabel("Fecha:"))
         header_layout.addWidget(self.date_selector)
-        content_layout.addLayout(header_layout)
+        self.content_layout.addLayout(header_layout)
         
         self.tabla_citas = QTableWidget()
         self.tabla_citas.setColumnCount(7)
@@ -121,13 +141,40 @@ class MainView(QMainWindow):
         
         header = self.tabla_citas.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        content_layout.addWidget(self.tabla_citas)
+        self.content_layout.addWidget(self.tabla_citas)
         
         lbl_info = QLabel("ℹ️ Doble clic para COBRAR | Click derecho para CANCELAR.")
         lbl_info.setStyleSheet("color: #666; font-style: italic;")
-        content_layout.addWidget(lbl_info)
-
-        main_layout.addWidget(content_area)
+        self.content_layout.addWidget(lbl_info)
+    
+    def limpiar_content_area(self):
+        """Limpia el área de contenido."""
+        while self.content_layout.count():
+            item = self.content_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self.limpiar_layout(item.layout())
+    
+    def limpiar_layout(self, layout):
+        """Limpia un layout recursivamente."""
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self.limpiar_layout(item.layout())
+    
+    def mostrar_dashboard(self):
+        """Muestra el dashboard de BI."""
+        self.limpiar_content_area()
+        self.dashboard_view = DashboardView(self)
+        self.content_layout.addWidget(self.dashboard_view)
+    
+    def mostrar_agenda(self):
+        """Muestra la vista de agenda."""
+        self.crear_vista_agenda()
+        self.cargar_citas_del_dia()
 
     def crear_boton_menu(self, texto, color_base):
         btn = QPushButton(texto)
