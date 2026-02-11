@@ -107,19 +107,23 @@ class PagoView(QDialog):
         layout_calculadora.addSpacing(10)
 
         # Monto Recibido
-        layout_calculadora.addWidget(QLabel("<b>Monto Recibido:</b>"))
+        lbl_monto_recibido = QLabel("<b>Monto Recibido:</b>")
+        layout_calculadora.addWidget(lbl_monto_recibido)
         self.input_monto_recibido = QDoubleSpinBox()
         self.input_monto_recibido.setMaximum(999999.99)
         self.input_monto_recibido.setMinimum(0.00)
         self.input_monto_recibido.setDecimals(2)
         self.input_monto_recibido.setValue(0.00)
         self.input_monto_recibido.setMinimumHeight(45)
+        lbl_monto_recibido.setBuddy(self.input_monto_recibido)
         layout_calculadora.addWidget(self.input_monto_recibido)
 
         # Moneda Recibida
-        layout_calculadora.addWidget(QLabel("<b>Moneda Recibida:</b>"))
+        lbl_moneda_recibida = QLabel("<b>Moneda Recibida:</b>")
+        layout_calculadora.addWidget(lbl_moneda_recibida)
         self.combo_moneda_recibida = QComboBox()
         self.combo_moneda_recibida.addItems(['USD ($)', 'Bolívares (Bs)'])
+        lbl_moneda_recibida.setBuddy(self.combo_moneda_recibida)
         layout_calculadora.addWidget(self.combo_moneda_recibida)
 
         layout_calculadora.addSpacing(10)
@@ -257,8 +261,10 @@ class PagoView(QDialog):
                 )
                 
         except Exception as e:
-            # Manejo de errores
-            self.lbl_vuelto_resultado.setText(f"❌ Error al calcular")
+            # Manejo de errores con logging
+            import logging
+            logging.error(f"Error en calcular_vuelto: {str(e)}", exc_info=True)
+            self.lbl_vuelto_resultado.setText(f"❌ Error al calcular: Verifique los valores")
             self.lbl_vuelto_resultado.setStyleSheet(
                 "color: #E74C3C; background-color: #1F2A35; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 14px;"
             )
