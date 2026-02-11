@@ -38,3 +38,30 @@ class ReportesController:
             return []
         finally:
             conn.close()
+
+    def obtener_comisiones(self, fecha_inicio, fecha_fin):
+        """Calcula comisiones por barbero en un rango de fechas."""
+        conn = self.db.get_connection()
+        if not conn: return []
+
+        try:
+            cursor = conn.cursor()
+            
+            query = """
+                SELECT b.nombre, SUM(c.total_estimado)
+                FROM citas c
+                JOIN barberos b ON c.id_barbero = b.id_barbero
+                WHERE c.estado = 'Pagada'
+                AND date(c.fecha) BETWEEN date(?) AND date(?)
+                GROUP BY b.nombre
+            """
+            
+            cursor.execute(query, (fecha_inicio, fecha_fin))
+            resultados = cursor.fetchall()
+            return resultados
+
+        except Exception as e:
+            print(f"Error generando reporte de comisiones: {e}")
+            return []
+        finally:
+            conn.close()
