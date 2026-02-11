@@ -68,7 +68,7 @@ class MainView(QMainWindow):
         btn_servicios.clicked.connect(self.abrir_servicios)
         btn_caja = self.crear_boton_menu("💰 Cierre de Caja", "#34495E")
         btn_caja.clicked.connect(self.abrir_cierre_caja)
-        btn_comisiones = self.crear_boton_menu("💰 Comisiones", "#34495E")
+        btn_comisiones = self.crear_boton_menu("📊 Comisiones", "#34495E")
         btn_comisiones.clicked.connect(self.abrir_comisiones)
         
         sidebar_layout.addWidget(btn_express)

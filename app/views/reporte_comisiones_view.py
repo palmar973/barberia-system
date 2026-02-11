@@ -12,6 +12,8 @@ class ReporteComisionesView(QDialog):
     Ventana modal para visualizar el Reporte de Comisiones (Nómina).
     Muestra el total vendido por cada barbero y su comisión (50%).
     """
+    COMMISSION_PERCENTAGE = 50.0
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Cálculo de Comisiones")
@@ -147,8 +149,8 @@ class ReporteComisionesView(QDialog):
         for row_idx, fila in enumerate(datos):
             barbero = fila[0]
             total_vendido = fila[1] if fila[1] else 0.0
-            porcentaje = 50.0
-            pago_a_realizar = total_vendido * 0.50
+            porcentaje = self.COMMISSION_PERCENTAGE
+            pago_a_realizar = total_vendido * (self.COMMISSION_PERCENTAGE / 100.0)
             gran_total += pago_a_realizar
             
             self.tabla.insertRow(row_idx)

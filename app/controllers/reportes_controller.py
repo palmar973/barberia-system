@@ -42,7 +42,8 @@ class ReportesController:
     def obtener_comisiones(self, fecha_inicio, fecha_fin):
         """Calcula comisiones por barbero en un rango de fechas."""
         conn = self.db.get_connection()
-        if not conn: return []
+        if not conn:
+            return []
 
         try:
             cursor = conn.cursor()
