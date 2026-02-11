@@ -15,6 +15,7 @@ from views.agendar_view import AgendarCitaView
 from views.pago_view import PagoView
 from views.cierre_caja_view import CierreCajaView
 from views.cita_express_view import CitaExpressView
+from views.reasignar_cliente_view import ReasignarClienteView
 
 class MainView(QMainWindow):
     """Dashboard Principal Multi-Barbero con Tasa BCV."""
@@ -183,11 +184,29 @@ class MainView(QMainWindow):
     def mostrar_menu_contextual(self, pos):
         index = self.tabla_citas.indexAt(pos)
         if not index.isValid(): return
+        fila = index.row()
+        self.tabla_citas.setCurrentCell(fila, index.column())
+        item_inicio = self.tabla_citas.item(fila, 0)
+        id_cita = item_inicio.data(Qt.ItemDataRole.UserRole)
+        cliente = self.tabla_citas.item(fila, 3).text()
+        estado = self.tabla_citas.item(fila, 6).text()
         menu = QMenu()
+
+        if cliente == "Público General":
+            accion_reasignar = QAction("👤 Vincular a Cliente Registrado", self)
+            accion_reasignar.triggered.connect(lambda: self._abrir_reasignar_cliente(id_cita))
+            menu.addAction(accion_reasignar)
+
         accion_cancelar = QAction("🚫 Cancelar Cita", self)
         accion_cancelar.triggered.connect(self.cancelar_cita_seleccionada)
-        menu.addAction(accion_cancelar)
+        if estado not in ['Pagada', 'Cancelada']:
+            menu.addAction(accion_cancelar)
         menu.exec(self.tabla_citas.mapToGlobal(pos))
+
+    def _abrir_reasignar_cliente(self, id_cita):
+        dialogo = ReasignarClienteView(id_cita, self)
+        if dialogo.exec():
+            self.cargar_citas_del_dia()
 
     def cancelar_cita_seleccionada(self):
         fila = self.tabla_citas.currentRow()

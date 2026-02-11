@@ -146,3 +146,41 @@ class CitasController:
             return True, "Cita cancelada."
         finally:
             conn.close()
+
+    def reasignar_cliente(self, id_cita, nuevo_id_cliente):
+        """Mueve una cita de 'Público General' a un cliente registrado."""
+        conn = self.db.get_connection()
+        if not conn:
+            return False, "Error de conexión."
+
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT c.id_cliente, cl.nombre
+                FROM citas c
+                JOIN clientes cl ON c.id_cliente = cl.id_cliente
+                WHERE c.id_cita = ?
+                """,
+                (id_cita,),
+            )
+            row = cursor.fetchone()
+            if not row:
+                return False, "La cita no existe."
+
+            _, nombre_actual = row
+            if nombre_actual != "Público General":
+                return False, "Solo se pueden reasignar citas de 'Público General'."
+
+            cursor.execute(
+                "UPDATE citas SET id_cliente = ? WHERE id_cita = ?",
+                (nuevo_id_cliente, id_cita),
+            )
+            conn.commit()
+            return True, "Cita vinculada al cliente seleccionado."
+        except Exception as e:
+            conn.rollback()
+            print(f"Error al reasignar cliente: {e}")
+            return False, "Error al reasignar la cita."
+        finally:
+            conn.close()
