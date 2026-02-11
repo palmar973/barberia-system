@@ -65,7 +65,7 @@ class MainView(QMainWindow):
         btn_express.clicked.connect(self.abrir_cita_express)
         btn_nueva_cita = self.crear_boton_menu("📅 Agendar Cita", "#27AE60")
         btn_nueva_cita.clicked.connect(self.abrir_nueva_cita)
-        btn_agenda = self.crear_boton_menu("📅 Agenda", "#34495E")
+        btn_agenda = self.crear_boton_menu("📋 Agenda", "#34495E")
         btn_agenda.clicked.connect(self.mostrar_agenda)
         btn_clientes = self.crear_boton_menu("👥 Clientes", "#34495E")
         btn_clientes.clicked.connect(self.abrir_clientes)

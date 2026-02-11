@@ -192,11 +192,13 @@ class DashboardView(QWidget):
         self.actualizar_kpi(self.card_ventas_hoy, f"${kpis['ventas_hoy']:.2f}")
         self.actualizar_kpi(self.card_citas_hoy, str(kpis['citas_hoy']))
         
-        # Calcular proyección del mes (simple: ventas_hoy * días restantes)
+        # Calcular proyección del mes (ventas_hoy * días restantes)
         import datetime
-        dia_actual = datetime.datetime.now().day
-        dias_mes = 30  # Aproximación
-        if kpis['ventas_hoy'] > 0:
+        import calendar
+        now = datetime.datetime.now()
+        dia_actual = now.day
+        dias_mes = calendar.monthrange(now.year, now.month)[1]
+        if kpis['ventas_hoy'] > 0 and dia_actual > 0:
             proyeccion = kpis['ventas_hoy'] * (dias_mes / dia_actual)
         else:
             proyeccion = 0
