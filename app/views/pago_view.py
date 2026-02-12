@@ -12,6 +12,10 @@ class PagoView(QDialog):
     Modal para procesar el cobro de una cita.
     Calcula conversión a Bs si hay tasa BCV disponible.
     """
+    # Constantes para métodos de pago
+    METODO_MIXTO = "Mixto"
+    METODO_MIXTO_DISPLAY = "Mixto (Combinado)"
+    
     def __init__(self, id_cita, tasa_bcv=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Procesar Pago")
@@ -200,7 +204,7 @@ class PagoView(QDialog):
 
         layout.addWidget(QLabel("<b>Método de Pago:</b>"))
         self.combo_metodo = QComboBox()
-        self.combo_metodo.addItems(['Efectivo ($)', 'Efectivo (Bs)', 'Pago Móvil', 'Zelle', 'Punto de Venta', 'Mixto (Combinado)'])
+        self.combo_metodo.addItems(['Efectivo ($)', 'Efectivo (Bs)', 'Pago Móvil', 'Zelle', 'Punto de Venta', self.METODO_MIXTO_DISPLAY])
         self.combo_metodo.currentIndexChanged.connect(self.on_metodo_changed)
         layout.addWidget(self.combo_metodo)
 
@@ -228,7 +232,7 @@ class PagoView(QDialog):
         
         self.input_monto_mixto = QDoubleSpinBox()
         self.input_monto_mixto.setMaximum(999999.99)
-        self.input_monto_mixto.setMinimum(0.01)
+        self.input_monto_mixto.setMinimum(0.00)  # Allow 0, validation happens on add
         self.input_monto_mixto.setDecimals(2)
         self.input_monto_mixto.setValue(0.00)
         form_layout_mixto.addWidget(QLabel("Monto:"))
@@ -322,7 +326,7 @@ class PagoView(QDialog):
         """Mostrar/ocultar frame de pagos mixtos según el método seleccionado."""
         metodo = self.combo_metodo.currentText()
         
-        if 'Mixto' in metodo:
+        if self.METODO_MIXTO in metodo:
             # Modo mixto: mostrar frame y bloquear input principal
             self.frame_pagos_mixtos.setVisible(True)
             self.input_monto_recibido.setReadOnly(True)
@@ -533,7 +537,7 @@ class PagoView(QDialog):
         # ========== FIN VALIDACIÓN ==========
 
         # Manejar Pago Mixto
-        if 'Mixto' in metodo:
+        if self.METODO_MIXTO in metodo:
             if not self.pagos_mixtos:
                 QMessageBox.warning(self, "Sin Pagos", "Debe agregar al menos un pago parcial en modo Mixto.")
                 return
@@ -547,7 +551,7 @@ class PagoView(QDialog):
                     detalles_mixtos.append(f"{pago['metodo']}: ${pago['monto']:.2f}")
             
             referencia = " | ".join(detalles_mixtos)
-            metodo = "Mixto"
+            metodo = self.METODO_MIXTO  # Use constant instead of hardcoded string
             
         else:
             # Pago normal: validar referencia
