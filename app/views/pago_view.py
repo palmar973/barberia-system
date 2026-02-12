@@ -87,55 +87,63 @@ class PagoView(QDialog):
         # ========== NUEVA SECCIÓN: CALCULADORA DE VUELTO ==========
         frame_calculadora = QFrame()
         frame_calculadora.setStyleSheet(
-            "background-color: #2b2b2b; border: 2px solid #FFA726; border-radius: 8px; padding: 10px;"
+            "background-color: #2b2b2b; border: 2px solid #FFA726; border-radius: 8px;"
         )
-        layout_calculadora = QVBoxLayout()
-        frame_calculadora.setLayout(layout_calculadora)
+        
+        # Layout principal con VBox para título + formulario + resultado
+        layout_calculadora_principal = QVBoxLayout()
+        frame_calculadora.setLayout(layout_calculadora_principal)
 
         lbl_calc_titulo = QLabel("💰 Calculadora de Vuelto")
         lbl_calc_titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_calc_titulo.setFont(QFont("Arial", 12, QFont.Bold))
-        lbl_calc_titulo.setStyleSheet("color: #FFA726; margin-bottom: 5px;")
-        layout_calculadora.addWidget(lbl_calc_titulo)
+        lbl_calc_titulo.setStyleSheet("color: #FFA726;")
+        layout_calculadora_principal.addWidget(lbl_calc_titulo)
 
         # Total a Pagar
         self.lbl_total_a_pagar = QLabel("Total a Pagar: $0.00 / Bs 0.00")
         self.lbl_total_a_pagar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lbl_total_a_pagar.setStyleSheet("color: #ECF0F1; font-size: 13px; font-weight: bold;")
-        layout_calculadora.addWidget(self.lbl_total_a_pagar)
+        layout_calculadora_principal.addWidget(self.lbl_total_a_pagar)
 
-        layout_calculadora.addSpacing(10)
+        layout_calculadora_principal.addSpacing(10)
 
+        # Formulario con QFormLayout para alineación correcta
+        layout_formulario = QFormLayout()
+        layout_formulario.setSpacing(15)
+        layout_formulario.setContentsMargins(20, 20, 20, 20)
+        
         # Monto Recibido
-        lbl_monto_recibido = QLabel("<b>Monto Recibido:</b>")
-        layout_calculadora.addWidget(lbl_monto_recibido)
+        lbl_monto_recibido = QLabel("Monto Recibido:")
+        lbl_monto_recibido.setStyleSheet("font-weight: bold;")
         self.input_monto_recibido = QDoubleSpinBox()
         self.input_monto_recibido.setMaximum(999999.99)
         self.input_monto_recibido.setMinimum(0.00)
         self.input_monto_recibido.setDecimals(2)
         self.input_monto_recibido.setValue(0.00)
         self.input_monto_recibido.setMinimumHeight(45)
-        lbl_monto_recibido.setBuddy(self.input_monto_recibido)
-        layout_calculadora.addWidget(self.input_monto_recibido)
+        layout_formulario.addRow(lbl_monto_recibido, self.input_monto_recibido)
 
         # Moneda Recibida
-        lbl_moneda_recibida = QLabel("<b>Moneda Recibida:</b>")
-        layout_calculadora.addWidget(lbl_moneda_recibida)
+        lbl_moneda_recibida = QLabel("Moneda Recibida:")
+        lbl_moneda_recibida.setStyleSheet("font-weight: bold;")
         self.combo_moneda_recibida = QComboBox()
         self.combo_moneda_recibida.addItems(['USD ($)', 'Bolívares (Bs)'])
-        lbl_moneda_recibida.setBuddy(self.combo_moneda_recibida)
-        layout_calculadora.addWidget(self.combo_moneda_recibida)
+        self.combo_moneda_recibida.setMinimumHeight(35)
+        layout_formulario.addRow(lbl_moneda_recibida, self.combo_moneda_recibida)
+        
+        layout_calculadora_principal.addLayout(layout_formulario)
 
-        layout_calculadora.addSpacing(10)
+        layout_calculadora_principal.addSpacing(15)
 
-        # Vuelto / Restante (Resultado)
+        # Vuelto / Restante (Resultado) - Destacado con fuente grande y negrita
         self.lbl_vuelto_resultado = QLabel("VUELTO: $0.00 / Bs 0.00")
         self.lbl_vuelto_resultado.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lbl_vuelto_resultado.setFont(QFont("Arial", 14, QFont.Bold))
+        self.lbl_vuelto_resultado.setFont(QFont("Arial", 16, QFont.Bold))
         self.lbl_vuelto_resultado.setStyleSheet(
-            "color: #2ECC71; background-color: #1F2A35; padding: 10px; border-radius: 5px;"
+            "color: #2ECC71; background-color: #1F2A35; padding: 12px; border-radius: 5px;"
         )
-        layout_calculadora.addWidget(self.lbl_vuelto_resultado)
+        layout_calculadora_principal.addWidget(self.lbl_vuelto_resultado)
 
         layout.addWidget(frame_calculadora)
         # ========== FIN CALCULADORA DE VUELTO ==========
