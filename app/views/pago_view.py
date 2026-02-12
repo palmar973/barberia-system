@@ -16,11 +16,14 @@ class PagoView(QDialog):
     METODO_MIXTO = "Mixto"
     METODO_MIXTO_DISPLAY = "Mixto (Combinado)"
     
+    # Tolerancia para validación de montos decimales
+    TOLERANCIA_MONTO = 0.01
+    
     def __init__(self, id_cita, tasa_bcv=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Procesar Pago")
         self.setModal(True)
-        self.setFixedSize(450, 850)  # Increased height for mixed payments frame
+        self.setFixedSize(450, 850)  # Altura aumentada para frame de pagos mixtos
         
         self.id_cita = id_cita
         self.tasa_bcv = tasa_bcv
@@ -232,7 +235,7 @@ class PagoView(QDialog):
         
         self.input_monto_mixto = QDoubleSpinBox()
         self.input_monto_mixto.setMaximum(999999.99)
-        self.input_monto_mixto.setMinimum(0.00)  # Allow 0, validation happens on add
+        self.input_monto_mixto.setMinimum(0.00)  # Mínimo 0, validación al agregar
         self.input_monto_mixto.setDecimals(2)
         self.input_monto_mixto.setValue(0.00)
         form_layout_mixto.addWidget(QLabel("Monto:"))
@@ -279,7 +282,7 @@ class PagoView(QDialog):
         self.btn_eliminar_mixto.clicked.connect(self.eliminar_pago_mixto)
         layout_mixtos.addWidget(self.btn_eliminar_mixto)
 
-        # Inicialmente oculto
+        # Frame de pagos mixtos inicialmente oculto
         self.frame_pagos_mixtos.setVisible(False)
         layout.addWidget(self.frame_pagos_mixtos)
         # ========== FIN FRAME PAGOS MIXTOS ==========
@@ -522,9 +525,8 @@ class PagoView(QDialog):
         else:
             monto_recibido_usd = monto_recibido
         
-        # Validar que el monto sea suficiente (con tolerancia de 0.01 para decimales)
-        TOLERANCIA = 0.01
-        if monto_recibido_usd < (self.monto_a_cobrar - TOLERANCIA):
+        # Validar que el monto sea suficiente
+        if monto_recibido_usd < (self.monto_a_cobrar - self.TOLERANCIA_MONTO):
             falta = self.monto_a_cobrar - monto_recibido_usd
             QMessageBox.warning(
                 self, 
@@ -551,7 +553,7 @@ class PagoView(QDialog):
                     detalles_mixtos.append(f"{pago['metodo']}: ${pago['monto']:.2f}")
             
             referencia = " | ".join(detalles_mixtos)
-            metodo = self.METODO_MIXTO  # Use constant instead of hardcoded string
+            metodo = self.METODO_MIXTO
             
         else:
             # Pago normal: validar referencia
