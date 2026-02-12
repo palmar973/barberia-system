@@ -232,73 +232,107 @@ class PagoView(QDialog):
         # ========== FRAME PARA PAGOS MIXTOS (Inicialmente Oculto) ==========
         self.frame_pagos_mixtos = QFrame()
         self.frame_pagos_mixtos.setStyleSheet(
-            "background-color: #273444; border: 2px solid #3498DB; border-radius: 8px; padding: 10px;"
+            "background-color: #273444; border: 2px solid #3498DB; border-radius: 8px; padding: 20px;"
         )
         layout_mixtos = QVBoxLayout()
+        layout_mixtos.setSpacing(15)  # Espaciado generoso entre elementos
+        layout_mixtos.setContentsMargins(15, 15, 15, 15)  # Márgenes generosos
         self.frame_pagos_mixtos.setLayout(layout_mixtos)
 
         lbl_mixtos_titulo = QLabel("💳 Pagos Parciales")
         lbl_mixtos_titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_mixtos_titulo.setFont(QFont("Arial", 11, QFont.Bold))
-        lbl_mixtos_titulo.setStyleSheet("color: #3498DB; margin-bottom: 5px; border: none;")
+        lbl_mixtos_titulo.setFont(QFont("Arial", 12, QFont.Bold))
+        lbl_mixtos_titulo.setStyleSheet("color: #3498DB; margin-bottom: 10px; border: none;")
         layout_mixtos.addWidget(lbl_mixtos_titulo)
 
-        # Mini formulario para agregar pago parcial
-        form_layout_mixto = QHBoxLayout()
+        # Formulario vertical para agregar pago parcial usando QFormLayout
+        form_layout_mixto = QFormLayout()
+        form_layout_mixto.setSpacing(12)  # Espaciado entre filas
+        form_layout_mixto.setContentsMargins(0, 0, 0, 0)
         
+        # Campo: Método de Pago
+        lbl_metodo = QLabel("Método de Pago:")
+        lbl_metodo.setStyleSheet("font-weight: bold; border: none; color: #ECF0F1;")
         self.combo_metodo_mixto = QComboBox()
         self.combo_metodo_mixto.addItems(['Efectivo ($)', 'Efectivo (Bs)', 'Pago Móvil', 'Zelle', 'Punto de Venta'])
-        form_layout_mixto.addWidget(QLabel("Método:"))
-        form_layout_mixto.addWidget(self.combo_metodo_mixto)
+        self.combo_metodo_mixto.setMinimumHeight(35)
+        form_layout_mixto.addRow(lbl_metodo, self.combo_metodo_mixto)
         
+        # Campo: Monto
+        lbl_monto = QLabel("Monto ($):")
+        lbl_monto.setStyleSheet("font-weight: bold; border: none; color: #ECF0F1;")
         self.input_monto_mixto = QDoubleSpinBox()
         self.input_monto_mixto.setMaximum(999999.99)
         self.input_monto_mixto.setMinimum(0.00) 
         self.input_monto_mixto.setDecimals(2)
         self.input_monto_mixto.setValue(0.00)
-        # Estilo específico para el spinbox interno para que herede las flechas bonitas
-        form_layout_mixto.addWidget(QLabel("Monto:"))
-        form_layout_mixto.addWidget(self.input_monto_mixto)
+        self.input_monto_mixto.setMinimumHeight(40)
+        form_layout_mixto.addRow(lbl_monto, self.input_monto_mixto)
         
+        # Campo: Referencia
+        lbl_referencia = QLabel("Referencia:")
+        lbl_referencia.setStyleSheet("font-weight: bold; border: none; color: #ECF0F1;")
         self.input_ref_mixto = QLineEdit()
-        self.input_ref_mixto.setPlaceholderText("Ref (opcional)")
-        self.input_ref_mixto.setMaximumWidth(100)
-        form_layout_mixto.addWidget(self.input_ref_mixto)
+        self.input_ref_mixto.setPlaceholderText("Número de referencia (opcional para efectivo)")
+        self.input_ref_mixto.setMinimumHeight(35)
+        self.input_ref_mixto.setStyleSheet("""
+            QLineEdit {
+                background-color: #34495E;
+                color: white;
+                border: 1px solid #5D6D7E;
+                border-radius: 5px;
+                padding: 8px;
+            }
+        """)
+        form_layout_mixto.addRow(lbl_referencia, self.input_ref_mixto)
         
-        self.btn_agregar_mixto = QPushButton("+")
-        self.btn_agregar_mixto.setToolTip("Agregar Pago Parcial")
-        self.btn_agregar_mixto.setFixedWidth(40)
+        layout_mixtos.addLayout(form_layout_mixto)
+        
+        layout_mixtos.addSpacing(10)
+        
+        # Botón de agregar grande y llamativo
+        self.btn_agregar_mixto = QPushButton("➕ Agregar Pago Parcial")
+        self.btn_agregar_mixto.setMinimumHeight(45)
         self.btn_agregar_mixto.setStyleSheet("""
             QPushButton {
                 background-color: #27AE60; 
                 color: white; 
                 font-weight: bold;
-                border-radius: 3px;
-                padding: 5px;
+                font-size: 14px;
+                border-radius: 5px;
+                padding: 10px;
             }
             QPushButton:hover { background-color: #1E8449; }
+            QPushButton:pressed { background-color: #145A32; }
         """)
         self.btn_agregar_mixto.clicked.connect(self.agregar_pago_mixto)
-        form_layout_mixto.addWidget(self.btn_agregar_mixto)
-        
-        layout_mixtos.addLayout(form_layout_mixto)
+        layout_mixtos.addWidget(self.btn_agregar_mixto)
 
-        # Lista de pagos agregados
+        layout_mixtos.addSpacing(10)
+
+        # Lista de pagos agregados con altura mínima de 150px
+        lbl_lista = QLabel("Pagos Registrados:")
+        lbl_lista.setStyleSheet("font-weight: bold; border: none; color: #ECF0F1;")
+        layout_mixtos.addWidget(lbl_lista)
+        
         self.list_pagos_mixtos = QListWidget()
-        self.list_pagos_mixtos.setMaximumHeight(120)
+        self.list_pagos_mixtos.setMinimumHeight(150)  # Altura mínima aumentada
         layout_mixtos.addWidget(self.list_pagos_mixtos)
 
         # Botón para eliminar pago seleccionado
         self.btn_eliminar_mixto = QPushButton("🗑️ Eliminar Seleccionado")
+        self.btn_eliminar_mixto.setMinimumHeight(40)
         self.btn_eliminar_mixto.setStyleSheet("""
             QPushButton {
                 background-color: #E74C3C; 
                 color: white; 
                 font-weight: bold;
-                border-radius: 3px;
-                padding: 5px;
+                font-size: 13px;
+                border-radius: 5px;
+                padding: 8px;
             }
             QPushButton:hover { background-color: #C0392B; }
+            QPushButton:pressed { background-color: #A93226; }
         """)
         self.btn_eliminar_mixto.clicked.connect(self.eliminar_pago_mixto)
         layout_mixtos.addWidget(self.btn_eliminar_mixto)
