@@ -19,7 +19,7 @@ def main():
         sys.exit(1)
 
     ventana_principal = MainView()
-    ventana_principal.show()
+    ventana_principal.showMaximized()
 
     sys.exit(app.exec()) # En Qt6 es .exec() sin guion bajo
 
