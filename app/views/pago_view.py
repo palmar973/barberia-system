@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QListWidget, QDialogButtonBox
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QDoubleValidator
 from controllers.pagos_controller import PagosController
 
 
@@ -237,52 +237,14 @@ class PagoView(QDialog):
             QComboBox { background-color: #34495E; color: white; border: 1px solid #5D6D7E; padding: 5px; }
             QComboBox QAbstractItemView { background-color: #2C3E50; color: white; selection-background-color: #27AE60; }
             QLineEdit#ref { background-color: #ECF0F1; color: #2C3E50; border: 1px solid #BDC3C7; border-radius: 5px; padding: 5px; }
-            
-            /* ESTILO CORREGIDO PARA SPINBOX (Flechas visibles) */
-            QDoubleSpinBox { 
-                background-color: #34495E; 
-                color: #ECF0F1; 
-                border: 2px solid #3498DB; 
-                border-radius: 5px; 
+            QLineEdit#monto_recibido {
+                background-color: #34495E;
+                color: #ECF0F1;
+                border: 2px solid #3498DB;
+                border-radius: 5px;
                 padding: 8px;
                 font-size: 16px;
                 font-weight: bold;
-            }
-            /* Botones de flechas con fondo transparente para mantener aspecto limpio */
-            QDoubleSpinBox::up-button {
-                subcontrol-origin: border;
-                subcontrol-position: top right;
-                width: 20px;
-                background: transparent;
-                border: none;
-            }
-            QDoubleSpinBox::up-button:hover { background: rgba(255, 255, 255, 0.08); }
-
-            QDoubleSpinBox::up-arrow {
-                image: none;
-                width: 10px;
-                height: 10px;
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                border-bottom: 7px solid #ECF0F1;
-            }
-
-            QDoubleSpinBox::down-button {
-                subcontrol-origin: border;
-                subcontrol-position: bottom right;
-                width: 20px;
-                background: transparent;
-                border: none;
-            }
-            QDoubleSpinBox::down-button:hover { background: rgba(255, 255, 255, 0.08); }
-
-            QDoubleSpinBox::down-arrow {
-                image: none;
-                width: 10px;
-                height: 10px;
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                border-top: 7px solid #ECF0F1;
             }
 
             /* Estilos para la lista de pagos mixtos */
@@ -366,11 +328,11 @@ class PagoView(QDialog):
         # Monto Recibido
         lbl_monto_recibido = QLabel("Monto Recibido:")
         lbl_monto_recibido.setStyleSheet("font-weight: bold; border: none;")
-        self.input_monto_recibido = QDoubleSpinBox()
-        self.input_monto_recibido.setMaximum(999999.99)
-        self.input_monto_recibido.setMinimum(0.00)
-        self.input_monto_recibido.setDecimals(2)
-        self.input_monto_recibido.setValue(0.00)
+        self.input_monto_recibido = QLineEdit()
+        self.input_monto_recibido.setObjectName("monto_recibido")
+        self.input_monto_recibido.setValidator(QDoubleValidator(0.0, 999999.99, 2, self))
+        self.input_monto_recibido.setText("")
+        self.input_monto_recibido.setPlaceholderText("0.00")
         self.input_monto_recibido.setMinimumHeight(45)
         layout_formulario.addRow(lbl_monto_recibido, self.input_monto_recibido)
 
@@ -459,71 +421,22 @@ class PagoView(QDialog):
         self.btn_cancelar.clicked.connect(self.reject)
 
         # Conectar señales para cálculo automático
-        self.input_monto_recibido.valueChanged.connect(self.calcular_vuelto)
+        self.input_monto_recibido.textChanged.connect(self.calcular_vuelto)
         self.combo_moneda_recibida.currentIndexChanged.connect(self.calcular_vuelto)
 
     def on_metodo_changed(self):
         """Mostrar/ocultar botón de desglose y bloquear/desbloquear input de monto."""
         metodo = self.combo_metodo.currentText()
 
-        estilo_base_spinbox = """
-            QDoubleSpinBox {
-                color: #ECF0F1;
-                border: 2px solid #3498DB;
-                border-radius: 5px;
-                padding: 8px;
-                font-size: 16px;
-                font-weight: bold;
-            }
-            QDoubleSpinBox::up-button {
-                subcontrol-origin: border;
-                subcontrol-position: top right;
-                width: 20px;
-                background: transparent;
-                border: none;
-            }
-            QDoubleSpinBox::up-button:hover { background: rgba(255, 255, 255, 0.08); }
-            QDoubleSpinBox::up-arrow {
-                image: none;
-                width: 10px;
-                height: 10px;
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                border-bottom: 7px solid #ECF0F1;
-            }
-            QDoubleSpinBox::down-button {
-                subcontrol-origin: border;
-                subcontrol-position: bottom right;
-                width: 20px;
-                background: transparent;
-                border: none;
-            }
-            QDoubleSpinBox::down-button:hover { background: rgba(255, 255, 255, 0.08); }
-            QDoubleSpinBox::down-arrow {
-                image: none;
-                width: 10px;
-                height: 10px;
-                border-left: 5px solid transparent;
-                border-right: 5px solid transparent;
-                border-top: 7px solid #ECF0F1;
-            }
-        """
-
         if self.METODO_MIXTO in metodo:
             self.btn_desglose.setVisible(True)
             self.input_monto_recibido.setReadOnly(True)
-            self.input_monto_recibido.setStyleSheet(
-                estilo_base_spinbox.replace("QDoubleSpinBox {", "QDoubleSpinBox {\n                background-color: #566573;")
-            )
             self.pagos_mixtos.clear()
             self.detalle_pago_mixto = ""
-            self.input_monto_recibido.setValue(0.00)
+            self.input_monto_recibido.setText("")
         else:
             self.btn_desglose.setVisible(False)
             self.input_monto_recibido.setReadOnly(False)
-            self.input_monto_recibido.setStyleSheet(
-                estilo_base_spinbox.replace("QDoubleSpinBox {", "QDoubleSpinBox {\n                background-color: #34495E;")
-            )
             self.pagos_mixtos.clear()
             self.detalle_pago_mixto = ""
 
@@ -532,7 +445,8 @@ class PagoView(QDialog):
         if dialog.exec() == QDialog.Accepted:
             self.pagos_mixtos = dialog.get_pagos()
             self.detalle_pago_mixto = dialog.get_detalle_texto()
-            self.input_monto_recibido.setValue(dialog.get_total())
+            total = dialog.get_total()
+            self.input_monto_recibido.setText(f"{total:.2f}")
             self.calcular_vuelto()
 
     def cargar_datos(self):
@@ -566,7 +480,7 @@ class PagoView(QDialog):
         """
         try:
             # Obtener valores
-            monto_recibido = self.input_monto_recibido.value()
+            monto_recibido = float(self.input_monto_recibido.text() or 0)
             moneda_seleccionada = self.combo_moneda_recibida.currentText()
             
             # Convertir a USD para comparar
@@ -624,7 +538,7 @@ class PagoView(QDialog):
         referencia = self.input_referencia.text().strip()
 
         # ========== VALIDACIÓN DE SEGURIDAD (NO PERMITIR PAGO INCOMPLETO) ==========
-        monto_recibido = self.input_monto_recibido.value()
+        monto_recibido = float(self.input_monto_recibido.text() or 0)
         moneda_seleccionada = self.combo_moneda_recibida.currentText()
         
         # Normalizar a USD
